@@ -24,6 +24,14 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 
+# <<< 2. ADD A THRESHOLD VALUE FOR "CLOSENESS" >>>
+# This is a normalized distance (0.0 to 1.0).
+# You'll need to experiment with this value. Start with 0.05.
+GESTURE_THRESHOLD = 0.05
+
+# This will track if we are already in a "clicked" state
+click_locked = False
+
 # For webcam input:
 cap = cv2.VideoCapture(0)
 with mp_hands.Hands(
@@ -34,8 +42,9 @@ with mp_hands.Hands(
     success, image = cap.read()
     if not success:
       print("Ignoring empty camera frame.")
-      # If loading a video, use 'break' instead of 'continue'.
       continue
+
+    image_height, image_width, _ = image.shape
 
     # To improve performance, optionally mark the image as not writeable to
     # pass by reference.
@@ -46,14 +55,31 @@ with mp_hands.Hands(
     # Draw the hand annotations on the image.
     image.flags.writeable = True
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
     if results.multi_hand_landmarks:
-      for hand_landmarks in results.multi_hand_landmarks:
-        mp_drawing.draw_landmarks(
-            image,
-            hand_landmarks,
-            mp_hands.HAND_CONNECTIONS,
-            mp_drawing_styles.get_default_hand_landmarks_style(),
-            mp_drawing_styles.get_default_hand_connections_style())
+
+      # select first hand detected
+      hand_landmarks = results.multi_hand_landmarks[0]
+
+      lm4 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
+      lm10 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
+      distance = math.hypot(lm4.x - lm10.x, lm4.y - lm10.y)
+
+      if distance < GESTURE_THRESHOLD and not click_locked:
+        print("CLICKED")
+        click_locked = True
+
+      elif distance >= GESTURE_THRESHOLD:
+        click_locked = False
+
+      mp_drawing.draw_landmarks(
+          image,
+          hand_landmarks,
+          mp_hands.HAND_CONNECTIONS,
+          mp_drawing_styles.get_default_hand_landmarks_style(),
+          mp_drawing_styles.get_default_hand_connections_style())
+      
+      
     # Flip the image horizontally for a selfie-view display.
     cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
     if cv2.waitKey(5) & 0xFF == 27:
