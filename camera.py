@@ -71,7 +71,7 @@ def angle_to_vertical_deg(hand_lm: Any, pip_idx: int, tip_idx: int) -> float:
 # # This is a normalized distance (0.0 to 1.0).
 # # You'll need to experiment with this value. Start with 0.05.
 # GESTURE_THRESHOLD = 0.05
-wrist_threshold = 0.25
+wrist_threshold = 0.125
 
 # # This will track if we are already in a "clicked" state
 # click_locked = False
@@ -112,8 +112,15 @@ with mp_hands.Hands(
 
       lm8 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
       lm5 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+      lm16 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP]
+      lm12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+      lm20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
+      lm0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST]
+      d1 = math.hypot(lm16.x - lm0.x, lm16.y - lm0.y)
+      d2 = math.hypot(lm12.x - lm0.x, lm12.y - lm0.y)
+      d3 = math.hypot(lm20.x - lm0.x, lm20.y - lm0.y)
       
-      if lm8.y < (lm5.y - 0.085):
+      if lm8.y < (lm5.y - 0.085) and (d3 < wrist_threshold and d2 < wrist_threshold and d1 < wrist_threshold):
         print("CURSOR MOVING: ", lm8.x, lm8.y)
 
       lm4 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
@@ -121,13 +128,6 @@ with mp_hands.Hands(
       click_distance = math.hypot(lm4.x - lm10.x, lm4.y - lm10.y)
 
       if click_distance < GESTURE_THRESHOLD and not click_locked:
-        lm16 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP]
-        lm12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
-        lm20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
-        lm0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST]
-        d1 = math.hypot(lm16.x - lm0.x, lm16.y - lm0.y)
-        d2 = math.hypot(lm12.x - lm0.x, lm12.y - lm0.y)
-        d3 = math.hypot(lm20.x - lm0.x, lm20.y - lm0.y)
         if d3 < wrist_threshold and d2 < wrist_threshold and d1 < wrist_threshold:
           print("CLICKED")
           click_locked = True
