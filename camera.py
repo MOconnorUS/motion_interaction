@@ -33,7 +33,7 @@ GESTURE_THRESHOLD: float = 0.05         # thumb–pinky/other distances (existin
 FINGERS_TOGETHER_THRESH: float = 0.06   # how close index/middle tips must be for scroll lock
 EXTENSION_MARGIN: float = 0.02          # tip must be above PIP by this amount to be "extended"
 ORIENT_ANGLE_TOL_DEG: float = 25.0      # tolerance for "straight up" or "straight down"
-wrist_threshold = 0.25
+wrist_threshold = 0.125
 
 # States
 click_locked: bool = False       # pre-existing
@@ -115,8 +115,15 @@ with mp_hands.Hands(
 
       lm8 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
       lm5 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+      lm16 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP]
+      lm12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+      lm20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
+      lm0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST]
+      d1 = math.hypot(lm16.x - lm0.x, lm16.y - lm0.y)
+      d2 = math.hypot(lm12.x - lm0.x, lm12.y - lm0.y)
+      d3 = math.hypot(lm20.x - lm0.x, lm20.y - lm0.y)
       
-      if lm8.y < (lm5.y - 0.085):
+      if lm8.y < (lm5.y - 0.085) and (d3 < wrist_threshold and d2 < wrist_threshold and d1 < wrist_threshold):
         print("CURSOR MOVING: ", lm8.x, lm8.y)
 
       lm4 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
@@ -124,13 +131,6 @@ with mp_hands.Hands(
       click_distance = math.hypot(lm4.x - lm10.x, lm4.y - lm10.y)
 
       if click_distance < GESTURE_THRESHOLD and not click_locked:
-        lm16 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP]
-        lm12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
-        lm20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
-        lm0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST]
-        d1 = math.hypot(lm16.x - lm0.x, lm16.y - lm0.y)
-        d2 = math.hypot(lm12.x - lm0.x, lm12.y - lm0.y)
-        d3 = math.hypot(lm20.x - lm0.x, lm20.y - lm0.y)
         if d3 < wrist_threshold and d2 < wrist_threshold and d1 < wrist_threshold:
           left_click(0,0)
           print("CLICKED")
