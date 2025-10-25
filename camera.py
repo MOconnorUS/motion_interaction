@@ -31,6 +31,8 @@ GESTURE_THRESHOLD = 0.05
 
 # This will track if we are already in a "clicked" state
 click_locked = False
+# This will track if we are already in a "alt-tab" state
+aTab_locked = False
 
 # For webcam input:
 cap = cv2.VideoCapture(0)
@@ -63,14 +65,24 @@ with mp_hands.Hands(
 
       lm4 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
       lm10 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
-      distance = math.hypot(lm4.x - lm10.x, lm4.y - lm10.y)
+      click_distance = math.hypot(lm4.x - lm10.x, lm4.y - lm10.y)
 
-      if distance < GESTURE_THRESHOLD and not click_locked:
+      if click_distance < GESTURE_THRESHOLD and not click_locked:
         print("CLICKED")
         click_locked = True
 
-      elif distance >= GESTURE_THRESHOLD:
+      elif click_distance >= GESTURE_THRESHOLD:
         click_locked = False
+
+      lm20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
+      aTab_distance = math.hypot(lm4.x - lm20.x, lm4.y - lm20.y)
+
+      if aTab_distance < GESTURE_THRESHOLD and not aTab_locked:
+        print("ALT-TAB")
+        aTab_locked = True
+
+      elif aTab_distance >= GESTURE_THRESHOLD:
+        aTab_locked = False
 
       mp_drawing.draw_landmarks(
           image,
