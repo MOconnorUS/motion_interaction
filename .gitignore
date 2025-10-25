@@ -1,3 +1,2 @@
 # Python Virtual Environments
-motion_env/
-.env
+*_env/
