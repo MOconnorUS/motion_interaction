@@ -28,11 +28,14 @@ mp_hands = mp.solutions.hands
 # This is a normalized distance (0.0 to 1.0).
 # You'll need to experiment with this value. Start with 0.05.
 GESTURE_THRESHOLD = 0.05
+wrist_threshold = 0.25
 
 # This will track if we are already in a "clicked" state
 click_locked = False
 # This will track if we are already in a "alt-tab" state
 aTab_locked = False
+# This will track if we are already in a "ctrl-tab" state
+cTab_locked = False
 
 # For webcam input:
 cap = cv2.VideoCapture(0)
@@ -68,14 +71,22 @@ with mp_hands.Hands(
       click_distance = math.hypot(lm4.x - lm10.x, lm4.y - lm10.y)
 
       if click_distance < GESTURE_THRESHOLD and not click_locked:
-        print("CLICKED")
-        click_locked = True
+        lm16 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP]
+        lm12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+        lm20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
+        lm0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST]
+        d1 = math.hypot(lm16.x - lm0.x, lm16.y - lm0.y)
+        d2 = math.hypot(lm12.x - lm0.x, lm12.y - lm0.y)
+        d3 = math.hypot(lm20.x - lm0.x, lm20.y - lm0.y)
+        if d3 < wrist_threshold and d2 < wrist_threshold and d1 < wrist_threshold:
+          print("CLICKED")
+          click_locked = True
 
       elif click_distance >= GESTURE_THRESHOLD:
         click_locked = False
 
-      lm20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
-      aTab_distance = math.hypot(lm4.x - lm20.x, lm4.y - lm20.y)
+      lm12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+      aTab_distance = math.hypot(lm4.x - lm12.x, lm4.y - lm12.y)
 
       if aTab_distance < GESTURE_THRESHOLD and not aTab_locked:
         print("ALT-TAB")
@@ -83,6 +94,16 @@ with mp_hands.Hands(
 
       elif aTab_distance >= GESTURE_THRESHOLD:
         aTab_locked = False
+
+      lm20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
+      cTab_distance = math.hypot(lm4.x - lm20.x, lm4.y - lm20.y)
+
+      if cTab_distance < GESTURE_THRESHOLD and not cTab_locked:
+        print("CTRL-TAB")
+        cTab_locked = True
+
+      elif cTab_distance >= GESTURE_THRESHOLD:
+        cTab_locked = False
 
       mp_drawing.draw_landmarks(
           image,
