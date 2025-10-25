@@ -46,7 +46,7 @@ def left_click(x : int, y : int) -> None:
     """
 
     ### Unsure if we need this since cursor should already be set ###
-    user32.SetCursorPos(x, y)
+   # user32.SetCursorPos(x, y)
 
     # Left Down
     user32.mouse_event(MOUSE_DOWN_EVENT, 0, 0, 0, 0)
@@ -56,18 +56,28 @@ def left_click(x : int, y : int) -> None:
 
     return None
 
-def alt_tab() -> None:
+def alt_tab_start() -> None:
     """
-    Perform a simulated alt tab with the keyboard.
+    Holds the Alt key down and presses Tab once to start the menu.
     """
-    # Press Alt + Tab
-    user32.keybd_event(ALT_KEY, 0, 0, 0)
-    user32.keybd_event(TAB_KEY, 0, 0, 0)
+    user32.keybd_event(ALT_KEY, 0, 0, 0)      # Press Alt
+    user32.keybd_event(TAB_KEY, 0, 0, 0)     # Press Tab
+    user32.keybd_event(TAB_KEY, 0, UP_EVENT, 0) # Release Tab
+    return None
 
-    # Release Alt + Tab
-    user32.keybd_event(ALT_KEY, 0, UP_EVENT, 0)
-    user32.keybd_event(TAB_KEY, 0, UP_EVENT, 0)
+def alt_tab_cycle() -> None:
+    """
+    Presses and releases the Tab key. Assumes Alt is already held.
+    """
+    user32.keybd_event(TAB_KEY, 0, 0, 0)     # Press Tab
+    user32.keybd_event(TAB_KEY, 0, UP_EVENT, 0) # Release Tab
+    return None
 
+def alt_tab_release() -> None:
+    """
+    Releases the Alt key to select the window.
+    """
+    user32.keybd_event(ALT_KEY, 0, UP_EVENT, 0) # Release Alt
     return None
 
 def ctrl_tab() -> None:

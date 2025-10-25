@@ -20,6 +20,8 @@ import cv2
 import mediapipe as mp
 import math
 import ctypes
+import time
+from peripheral_interactions import left_click, ctrl_tab, alt_tab_cycle, alt_tab_release, alt_tab_start
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -31,6 +33,7 @@ GESTURE_THRESHOLD: float = 0.05         # thumb–pinky/other distances (existin
 FINGERS_TOGETHER_THRESH: float = 0.06   # how close index/middle tips must be for scroll lock
 EXTENSION_MARGIN: float = 0.02          # tip must be above PIP by this amount to be "extended"
 ORIENT_ANGLE_TOL_DEG: float = 25.0      # tolerance for "straight up" or "straight down"
+wrist_threshold = 0.25
 
 # States
 click_locked: bool = False       # pre-existing
@@ -38,6 +41,15 @@ aTab_locked: bool = False        # pre-existing
 scroll_locked: bool = False
 scroll_up: bool = False
 scroll_down: bool = False
+alt_key_down = False
+
+
+# --- Timer/State Variables ---
+ALT_TAB_TIMEOUT: float = 2.0
+GESTURE_COOLDOWN: float = 0.5
+alt_key_down: bool = False
+last_gesture_time: float = 0
+last_valid_gesture_time: float = 0
 
 def norm_dist(a: Any, b: Any) -> float:
     """Return normalized euclidean distance between two landmarks a,b (x,y)."""
@@ -67,16 +79,6 @@ def angle_to_vertical_deg(hand_lm: Any, pip_idx: int, tip_idx: int) -> float:
     cos_theta = max(-1.0, min(1.0, (-vy) / mag))  # compare to up-vector (0,-1)
     return math.degrees(math.acos(cos_theta))
 
-# # <<< 2. ADD A THRESHOLD VALUE FOR "CLOSENESS" >>>
-# # This is a normalized distance (0.0 to 1.0).
-# # You'll need to experiment with this value. Start with 0.05.
-# GESTURE_THRESHOLD = 0.05
-wrist_threshold = 0.25
-
-# # This will track if we are already in a "clicked" state
-# click_locked = False
-# # This will track if we are already in a "alt-tab" state
-# aTab_locked = False
 # # This will track if we are already in a "ctrl-tab" state
 # cTab_locked = False
 
@@ -91,7 +93,8 @@ with mp_hands.Hands(
     if not success:
       print("Ignoring empty camera frame.")
       continue
-
+    
+    current_time: float = time.time()
     image_height, image_width, _ = image.shape
 
     # To improve performance, optionally mark the image as not writeable to
@@ -129,26 +132,47 @@ with mp_hands.Hands(
         d2 = math.hypot(lm12.x - lm0.x, lm12.y - lm0.y)
         d3 = math.hypot(lm20.x - lm0.x, lm20.y - lm0.y)
         if d3 < wrist_threshold and d2 < wrist_threshold and d1 < wrist_threshold:
+          left_click(0,0)
           print("CLICKED")
           click_locked = True
 
       elif click_distance >= GESTURE_THRESHOLD:
         click_locked = False
 
-      lm12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
-      aTab_distance = math.hypot(lm4.x - lm12.x, lm4.y - lm12.y)
+# ---------- ALT-TAB LOGIC (Timer-Based) ----------
+      lm12 = lm[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
+      aTab_distance = norm_dist(lm4, lm12)
 
-      if aTab_distance < GESTURE_THRESHOLD and not aTab_locked:
-        print("ALT-TAB")
-        aTab_locked = True
-
-      elif aTab_distance >= GESTURE_THRESHOLD:
-        aTab_locked = False
+      # Check if gesture is made AND cooldown has passed
+      if aTab_distance < GESTURE_THRESHOLD and (current_time - last_valid_gesture_time) > GESTURE_COOLDOWN:
+          
+          if not alt_key_down:
+              # FIRST press: Call your start function
+              alt_tab_start()
+              alt_key_down = True
+              print("ALT-TAB START (Alt Down)")
+          else:
+              # 'Alt' is already down: Call your cycle function
+              alt_tab_cycle()
+              print("...NEXT TAB")
+          
+          # Reset both timers
+          last_gesture_time = current_time
+          last_valid_gesture_time = current_time
+      
+      # --- This block runs EVERY frame to check for a timeout ---
+      # If 'alt' is down AND it's been too long since the last gesture
+      if alt_key_down and (current_time - last_gesture_time) > ALT_TAB_TIMEOUT:
+          # Call your release function
+          alt_tab_release()
+          alt_key_down = False
+          print("ALT-TAB TIMEOUT (Alt Up)")
 
       lm20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
       cTab_distance = math.hypot(lm4.x - lm20.x, lm4.y - lm20.y)
 
       if cTab_distance < GESTURE_THRESHOLD and not cTab_locked:
+        ctrl_tab()
         print("CTRL-TAB")
         cTab_locked = True
 
