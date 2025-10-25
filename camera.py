@@ -110,6 +110,12 @@ with mp_hands.Hands(
       hand_landmarks = results.multi_hand_landmarks[0]
       lm = hand_landmarks.landmark
 
+      lm8 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
+      lm5 = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP]
+      
+      if lm8.y < (lm5.y - 0.085):
+        print("CURSOR MOVING: ", lm8.x, lm8.y)
+
       lm4 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
       lm10 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
       click_distance = math.hypot(lm4.x - lm10.x, lm4.y - lm10.y)
