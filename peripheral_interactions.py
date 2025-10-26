@@ -35,7 +35,7 @@ CTRL_KEY = 0x11
 MOUSE_WHEEL = 0x0800
 
 # Wheel Speed
-WHEEL_DELTA = 120
+WHEEL_DELTA = 50
 
 def move_cursor(x : int, y : int) -> None:
     """

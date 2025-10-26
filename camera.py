@@ -28,7 +28,8 @@ from peripheral_interactions import (
    alt_tab_release, 
    alt_tab_start,
    get_screen_dimensions,
-   move_cursor
+   move_cursor,
+   scroll
 )
 
 # Mediapipe setup
@@ -335,7 +336,7 @@ def scroll_functionality(hand_landmarks : Any) -> None:
     if only_index_up:
         if scroll_locked or scroll_up or scroll_down:
             print("SCROLL LOCK FORCED OFF (index-only)")
-        scroll_locked = False
+        scroll_locked = True
         scroll_up = False
         scroll_down = False
     else:
@@ -360,7 +361,8 @@ def scroll_functionality(hand_landmarks : Any) -> None:
           scroll_up = (avg_theta <= ORIENT_ANGLE_TOL_DEG)
           # do not set scroll_down here; down is controlled by fist gesture below
           if scroll_up:
-            print("SCROLL UP")
+            scroll(True,False)
+            #print("SCROLL UP")
           else:
             # not up; keep down state controlled elsewhere
             pass
@@ -379,7 +381,8 @@ def scroll_functionality(hand_landmarks : Any) -> None:
             if not scroll_down:
                 print("SCROLL DOWN START")
             scroll_down = True
-            print("SCROLL DOWN")
+            scroll(False,True)
+            #print("SCROLL DOWN")
         else:
             if scroll_down:
                 print("SCROLL DOWN OFF")
