@@ -51,6 +51,7 @@ scroll_locked: bool = False
 scroll_up: bool = False
 scroll_down: bool = False
 alt_key_down = False
+cTab_locked = False
 
 # --- Timer/State Variables ---
 ALT_TAB_TIMEOUT: float = 2.0
@@ -477,10 +478,11 @@ def main() -> None:
                 if aTab_distance < GESTURE_THRESHOLD:
                     alt_tab_func(current_time)
 
-                if cTab_distance < GESTURE_THRESHOLD:
+                if cTab_distance < GESTURE_THRESHOLD and cTab_locked is False:
                     ctrl_tab()
-                else:
                     cTab_locked = True
+                elif cTab_distance >= GESTURE_THRESHOLD and cTab_locked:
+                    cTab_locked = False
 
                 # --- This block runs EVERY frame to check for a timeout ---
                 # If 'alt' is down AND it's been too long since the last gesture
