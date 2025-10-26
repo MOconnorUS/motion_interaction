@@ -294,6 +294,9 @@ def ctrl_tab_func() -> None:
     """
     global cTab_locked
 
+    if cTab_locked is True:
+        return None
+
     if cTab_locked is False:
         ctrl_tab()
         print("CTRL-TAB")
