@@ -248,6 +248,7 @@ def lock_click() -> None:
             left_click()
             print("click")
             click_locked = True
+            return None
 
     click_locked = False
 
@@ -277,13 +278,13 @@ def alt_tab_func(current_time : float) -> None:
         last_gesture_time = current_time
         last_valid_gesture_time = current_time
 
-    # --- This block runs EVERY frame to check for a timeout ---
-    # If 'alt' is down AND it's been too long since the last gesture
-    if alt_key_down and (current_time - last_gesture_time) > ALT_TAB_TIMEOUT:
-        # Call your release function
-        alt_tab_release()
-        alt_key_down = False
-        print("ALT-TAB TIMEOUT (Alt Up)")
+    # # --- This block runs EVERY frame to check for a timeout ---
+    # # If 'alt' is down AND it's been too long since the last gesture
+    # if alt_key_down and (current_time - last_gesture_time) > ALT_TAB_TIMEOUT:
+    #     # Call your release function
+    #     alt_tab_release()
+    #     alt_key_down = False
+    #     print("ALT-TAB TIMEOUT (Alt Up)")
 
     return None
 
@@ -388,6 +389,8 @@ def scroll_functionality(hand_landmarks : Any) -> None:
     return None
 
 def main() -> None:
+    global alt_key_down, last_gesture_time
+    
     cap = open_cap()
 
     # Get the frame width and height
@@ -469,9 +472,17 @@ def main() -> None:
                 if aTab_distance < GESTURE_THRESHOLD:
                     alt_tab_func(current_time)
 
+                # --- This block runs EVERY frame to check for a timeout ---
+                # If 'alt' is down AND it's been too long since the last gesture
+                if alt_key_down and (current_time - last_gesture_time) > ALT_TAB_TIMEOUT:
+                    # Call your release function
+                    alt_tab_release()
+                    alt_key_down = False
+                    print("ALT-TAB TIMEOUT (Alt Up)")
+
                 scroll_functionality(hand_landmarks)
 
-                time.sleep(0.1)
+                # time.sleep(0.1)
 
                 mp_drawing.draw_landmarks(
                     image,
