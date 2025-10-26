@@ -37,17 +37,21 @@ MOUSE_WHEEL = 0x0800
 # Wheel Speed
 WHEEL_DELTA = 120
 
-def left_click(x : int, y : int) -> None:
+def move_cursor(x : int, y : int) -> None:
     """
-    Performs a simulated left click with the mouse.
-
+    Moves the cursor to an x, y coordinate.
+    
     @param x the x coordinate
     @param y the y coordinate
     """
+    user32.SetCursorPos(x, y)
 
-    ### Unsure if we need this since cursor should already be set ###
-   # user32.SetCursorPos(x, y)
+    return None
 
+def left_click() -> None:
+    """
+    Performs a simulated left click with the mouse.
+    """
     # Left Down
     user32.mouse_event(MOUSE_DOWN_EVENT, 0, 0, 0, 0)
 
@@ -60,24 +64,27 @@ def alt_tab_start() -> None:
     """
     Holds the Alt key down and presses Tab once to start the menu.
     """
-    user32.keybd_event(ALT_KEY, 0, 0, 0)      # Press Alt
-    user32.keybd_event(TAB_KEY, 0, 0, 0)     # Press Tab
-    user32.keybd_event(TAB_KEY, 0, UP_EVENT, 0) # Release Tab
+    # Press Alt Key, Press & Release Tab Key
+    user32.keybd_event(ALT_KEY, 0, 0, 0)      
+    user32.keybd_event(TAB_KEY, 0, 0, 0)     
+    user32.keybd_event(TAB_KEY, 0, UP_EVENT, 0)
     return None
 
 def alt_tab_cycle() -> None:
     """
     Presses and releases the Tab key. Assumes Alt is already held.
     """
-    user32.keybd_event(TAB_KEY, 0, 0, 0)     # Press Tab
-    user32.keybd_event(TAB_KEY, 0, UP_EVENT, 0) # Release Tab
+    # Press & Release Tab Key
+    user32.keybd_event(TAB_KEY, 0, 0, 0)     
+    user32.keybd_event(TAB_KEY, 0, UP_EVENT, 0) 
     return None
 
 def alt_tab_release() -> None:
     """
     Releases the Alt key to select the window.
     """
-    user32.keybd_event(ALT_KEY, 0, UP_EVENT, 0) # Release Alt
+    # Release Alt Key
+    user32.keybd_event(ALT_KEY, 0, UP_EVENT, 0) 
     return None
 
 def ctrl_tab() -> None:
@@ -116,10 +123,27 @@ def scroll(up : bool, down : bool) -> None:
 
     return None
 
+def get_screen_dimensions() -> list[int, int]:
+    """
+    Calculates the midpoint of the primary screen using ctypes on Windows.
 
+    @return tuple: A tuple containing the (x, y) coordinates of the midpoint.
+    """
+    user32 = ctypes.windll.user32
+    
+    # Get the screen width using SM_CXSCREEN (index 0)
+    screen_width = user32.GetSystemMetrics(0)
+    
+    # Get the screen height using SM_CYSCREEN (index 1)
+    screen_height = user32.GetSystemMetrics(1)
+    
+    return screen_width, screen_height
 
 ### For Testing Purposes Only ###
 # alt_tab()
 # left_click(1, 1)
 # ctrl_tab()
 # scroll(up=True, down=False)
+
+# width, height = get_screen_dimensions()
+# print(f'WIDTH: {width}, HEIGHT: {height}')
