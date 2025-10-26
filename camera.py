@@ -384,7 +384,7 @@ def scroll_functionality(hand_landmarks : Any) -> None:
     return None
 
 def main() -> None:
-    global alt_key_down, last_gesture_time
+    global alt_key_down, last_gesture_time, cTab_locked
 
     cap = open_cap()
 
@@ -476,6 +476,8 @@ def main() -> None:
 
                 if cTab_distance < GESTURE_THRESHOLD:
                     ctrl_tab()
+                else:
+                    cTab_locked = True
 
                 # --- This block runs EVERY frame to check for a timeout ---
                 # If 'alt' is down AND it's been too long since the last gesture
