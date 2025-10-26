@@ -292,20 +292,14 @@ def ctrl_tab_func() -> None:
     """
     Perform Ctrl + Tab Functionality to cycle between tabs.
     """
-    cTab_distance = calc_hypot(
-       landmarks["Pinky Finger"][3].x, 
-       landmarks["Thumb"][3].x,
-       landmarks["Pinky Finger"][3].y, 
-       landmarks["Thumb"][3].y
-    )
 
-    if cTab_distance < GESTURE_THRESHOLD and not cTab_locked:
+    if not cTab_locked:
         ctrl_tab()
         print("CTRL-TAB")
         cTab_locked = True
+        return None
 
-    elif cTab_distance >= GESTURE_THRESHOLD:
-        cTab_locked = False
+    cTab_locked = False
 
     return None
 
@@ -390,7 +384,7 @@ def scroll_functionality(hand_landmarks : Any) -> None:
 
 def main() -> None:
     global alt_key_down, last_gesture_time
-    
+
     cap = open_cap()
 
     # Get the frame width and height
@@ -464,6 +458,13 @@ def main() -> None:
                     landmarks["Thumb"][3].y
                 )
 
+                cTab_distance = calc_hypot(
+                    landmarks["Pinky Finger"][3].x, 
+                    landmarks["Thumb"][3].x,
+                    landmarks["Pinky Finger"][3].y, 
+                    landmarks["Thumb"][3].y
+                )
+
                 aTab_distance = norm_dist(landmarks["Thumb"][3], landmarks["Middle Finger"][3])
                 
                 if click_distance < GESTURE_THRESHOLD:
@@ -471,6 +472,9 @@ def main() -> None:
 
                 if aTab_distance < GESTURE_THRESHOLD:
                     alt_tab_func(current_time)
+
+                if cTab_distance < GESTURE_THRESHOLD:
+                    ctrl_tab()
 
                 # --- This block runs EVERY frame to check for a timeout ---
                 # If 'alt' is down AND it's been too long since the last gesture
