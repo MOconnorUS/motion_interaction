@@ -292,7 +292,8 @@ def ctrl_tab_func() -> None:
     """
     Perform Ctrl + Tab Functionality to cycle between tabs.
     """
-
+    global cTab_locked
+    
     if not cTab_locked:
         ctrl_tab()
         print("CTRL-TAB")
