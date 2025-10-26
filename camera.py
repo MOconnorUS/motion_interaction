@@ -264,7 +264,7 @@ def alt_tab_func(current_time : float) -> None:
 
     # Check if gesture is made AND cooldown has passed
     if (current_time - last_valid_gesture_time) > GESTURE_COOLDOWN:
-        if not alt_key_down:
+        if alt_key_down is False:
             # FIRST press: Call your start function
             alt_tab_start()
             alt_key_down = True
@@ -293,8 +293,8 @@ def ctrl_tab_func() -> None:
     Perform Ctrl + Tab Functionality to cycle between tabs.
     """
     global cTab_locked
-    
-    if not cTab_locked:
+
+    if cTab_locked is False:
         ctrl_tab()
         print("CTRL-TAB")
         cTab_locked = True
