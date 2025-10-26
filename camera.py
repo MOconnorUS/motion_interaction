@@ -79,6 +79,18 @@ def angle_to_vertical_deg(hand_lm: Any, pip_idx: int, tip_idx: int) -> float:
     cos_theta = max(-1.0, min(1.0, (-vy) / mag))  # compare to up-vector (0,-1)
     return math.degrees(math.acos(cos_theta))
 
+# # <<< 2. ADD A THRESHOLD VALUE FOR "CLOSENESS" >>>
+# # This is a normalized distance (0.0 to 1.0).
+# # You'll need to experiment with this value. Start with 0.05.
+# GESTURE_THRESHOLD = 0.05
+wrist_threshold = 0.125
+away_from_wrist_threshold = .2
+
+
+# # This will track if we are already in a "clicked" state
+# click_locked = False
+# # This will track if we are already in a "alt-tab" state
+# aTab_locked = False
 # # This will track if we are already in a "ctrl-tab" state
 # cTab_locked = False
 
@@ -119,24 +131,31 @@ with mp_hands.Hands(
       lm12 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
       lm20 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
       lm0 = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST]
+      lm11 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_DIP]
+      lm15 = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_DIP]
+      lm19 = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_DIP]
       d1 = math.hypot(lm16.x - lm0.x, lm16.y - lm0.y)
       d2 = math.hypot(lm12.x - lm0.x, lm12.y - lm0.y)
       d3 = math.hypot(lm20.x - lm0.x, lm20.y - lm0.y)
+      d4 = lm12.y - lm11.y
+      d5 = lm16.y - lm15.y
+      d6 = lm20.y - lm19.y
       
       if lm8.y < (lm5.y - 0.085) and (d3 < wrist_threshold and d2 < wrist_threshold and d1 < wrist_threshold):
         print("CURSOR MOVING: ", lm8.x, lm8.y)
 
       lm4 = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
       lm10 = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_PIP]
-      click_distance = math.hypot(lm4.x - lm10.x, lm4.y - lm10.y)
+      click1_distance = math.hypot(lm4.x - lm10.x, lm4.y - lm10.y)
+      click2_distance = math.hypot(lm4.x - lm8.x, lm4.y - lm8.y)
 
-      if click_distance < GESTURE_THRESHOLD and not click_locked:
-        if d3 < wrist_threshold and d2 < wrist_threshold and d1 < wrist_threshold:
+      if (click1_distance < GESTURE_THRESHOLD and not click_locked) or (click2_distance < GESTURE_THRESHOLD and not click_locked):
+        if (d3 < wrist_threshold and d2 < wrist_threshold and d1 < wrist_threshold) or (lm12.y < lm11.y and lm16.y < lm15.y and lm20.y < lm19.y):
           left_click(0,0)
           print("CLICKED")
           click_locked = True
 
-      elif click_distance >= GESTURE_THRESHOLD:
+      elif click1_distance >= GESTURE_THRESHOLD and click2_distance >= GESTURE_THRESHOLD:
         click_locked = False
 
 # ---------- ALT-TAB LOGIC (Timer-Based) ----------
