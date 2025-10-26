@@ -84,7 +84,6 @@ def angle_to_vertical_deg(hand_lm: Any, pip_idx: int, tip_idx: int) -> float:
 # # You'll need to experiment with this value. Start with 0.05.
 # GESTURE_THRESHOLD = 0.05
 wrist_threshold = 0.125
-away_from_wrist_threshold = .2
 
 
 # # This will track if we are already in a "clicked" state
@@ -149,13 +148,13 @@ with mp_hands.Hands(
       click1_distance = math.hypot(lm4.x - lm10.x, lm4.y - lm10.y)
       click2_distance = math.hypot(lm4.x - lm8.x, lm4.y - lm8.y)
 
-      if (click1_distance < GESTURE_THRESHOLD and not click_locked) or (click2_distance < GESTURE_THRESHOLD and not click_locked):
-        if (d3 < wrist_threshold and d2 < wrist_threshold and d1 < wrist_threshold) or (lm12.y < lm11.y and lm16.y < lm15.y and lm20.y < lm19.y):
+      if (click1_distance < GESTURE_THRESHOLD and not click_locked): # or (click2_distance < GESTURE_THRESHOLD and not click_locked):
+        if (d3 < wrist_threshold and d2 < wrist_threshold and d1 < wrist_threshold): # or (lm12.y < lm11.y and lm16.y < lm15.y and lm20.y < lm19.y and lm8.y < lm11.y):
           left_click(0,0)
           print("CLICKED")
           click_locked = True
 
-      elif click1_distance >= GESTURE_THRESHOLD and click2_distance >= GESTURE_THRESHOLD:
+      elif click1_distance >= GESTURE_THRESHOLD: # and click2_distance >= GESTURE_THRESHOLD:
         click_locked = False
 
 # ---------- ALT-TAB LOGIC (Timer-Based) ----------
