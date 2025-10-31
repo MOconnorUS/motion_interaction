@@ -1,5 +1,5 @@
 # Welcome to J.A.R.V.I.S
-## Join | Automatic | Remote | Virtual | Interaction | System
+## Joint | Automatic | Remote | Virtual | Interaction | System
 
 # About
 J.A.R.V.I.S is a unique tool developed for the Hack OH/IO 2025 Hackathon by team 85 Jamm. J.A.R.V.I.S allows its user to interact with their personalized computer via their camera. 
@@ -20,4 +20,5 @@ J.A.R.V.I.S leverages Python to install all necessary tools as well as being the
 2. Create a Python virtual environment
 3. Activate your virtual environment and run setup.bat
 4. Run the camera python file: ```python camera.py```
+
 
